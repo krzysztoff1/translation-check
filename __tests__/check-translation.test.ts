@@ -7,11 +7,11 @@ describe('checkTranslation', () => {
     const pl = JSON.stringify({ home: 'Strona główna' })
 
     const result = checkTranslation({
-      mainTranslation: en,
-      translations: [pl]
+      mainTranslation: { json: en, filePath: 'en.json' },
+      translations: [{ json: pl, filePath: 'pl.json' }]
     })
 
-    expect(result).toBe(true)
+    expect(result.success).toBe(true)
   })
 
   it('should return false when translation is missing keys', () => {
@@ -19,11 +19,11 @@ describe('checkTranslation', () => {
     const pl = JSON.stringify({ home: 'Strona główna' })
 
     const result = checkTranslation({
-      mainTranslation: en,
-      translations: [pl]
+      mainTranslation: { json: en, filePath: 'en.json' },
+      translations: [{ json: pl, filePath: 'pl.json' }]
     })
 
-    expect(result).toBe(false)
+    expect(result.success).toBe(false)
   })
 
   it('should handle nested objects correctly', () => {
@@ -37,11 +37,11 @@ describe('checkTranslation', () => {
     })
 
     const result = checkTranslation({
-      mainTranslation: en,
-      translations: [pl]
+      mainTranslation: { json: en, filePath: 'en.json' },
+      translations: [{ json: pl, filePath: 'pl.json' }]
     })
 
-    expect(result).toBe(true)
+    expect(result.success).toBe(true)
   })
 
   it('should return false for mismatched nested objects', () => {
@@ -55,11 +55,11 @@ describe('checkTranslation', () => {
     })
 
     const result = checkTranslation({
-      mainTranslation: en,
-      translations: [pl]
+      mainTranslation: { json: en, filePath: 'en.json' },
+      translations: [{ json: pl, filePath: 'pl.json' }]
     })
 
-    expect(result).toBe(false)
+    expect(result.success).toBe(false)
   })
 
   it('should parse deeply nested translations', () => {
@@ -99,11 +99,11 @@ describe('checkTranslation', () => {
     })
 
     const result = checkTranslation({
-      mainTranslation: en,
-      translations: [pl]
+      mainTranslation: { json: en, filePath: 'en.json' },
+      translations: [{ json: pl, filePath: 'pl.json' }]
     })
 
-    expect(result).toBe(true)
+    expect(result.success).toBe(true)
   })
 
   it('should handle multiple translations', () => {
@@ -113,11 +113,15 @@ describe('checkTranslation', () => {
     const fr = JSON.stringify({ hello: 'Bonjour', goodbye: 'Au revoir' })
 
     const result = checkTranslation({
-      mainTranslation: en,
-      translations: [pl, es, fr]
+      mainTranslation: { json: en, filePath: 'en.json' },
+      translations: [
+        { json: pl, filePath: 'pl.json' },
+        { json: es, filePath: 'es.json' },
+        { json: fr, filePath: 'fr.json' }
+      ]
     })
 
-    expect(result).toBe(true)
+    expect(result.success).toBe(true)
   })
 
   it('should return false if any translation is invalid', () => {
@@ -126,11 +130,14 @@ describe('checkTranslation', () => {
     const es = JSON.stringify({ hello: 'Hola' }) // Missing 'goodbye'
 
     const result = checkTranslation({
-      mainTranslation: en,
-      translations: [pl, es]
+      mainTranslation: { json: en, filePath: 'en.json' },
+      translations: [
+        { json: pl, filePath: 'pl.json' },
+        { json: es, filePath: 'es.json' }
+      ]
     })
 
-    expect(result).toBe(false)
+    expect(result.success).toBe(false)
   })
 
   it('should handle empty objects', () => {
@@ -138,10 +145,10 @@ describe('checkTranslation', () => {
     const pl = JSON.stringify({})
 
     const result = checkTranslation({
-      mainTranslation: en,
-      translations: [pl]
+      mainTranslation: { json: en, filePath: 'en.json' },
+      translations: [{ json: pl, filePath: 'pl.json' }]
     })
 
-    expect(result).toBe(true)
+    expect(result.success).toBe(true)
   })
 })

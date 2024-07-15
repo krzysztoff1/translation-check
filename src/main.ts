@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
+import { readFileContent } from './read-file-contents'
+import { checkTranslation, Translation } from './check-translations'
 
 /**
  * The main function for the action.
@@ -7,20 +8,40 @@ import { wait } from './wait'
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    const mainTranslationPath = core.getInput('main_translation_path')
+    const translationPaths = core
+      .getInput('translation_paths')
+      .split(',')
+      .map(s => s.trim())
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    const [mainTranslation, ...translations]: Translation[] = await Promise.all(
+      [mainTranslationPath, ...translationPaths].map(async filePath => ({
+        json: await readFileContent(filePath),
+        filePath
+      }))
+    )
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    core.info('Checking translations...')
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    const { errors } = checkTranslation({
+      mainTranslation,
+      translations
+    })
+
+    for (const error of errors) {
+      core.error(
+        `Missing translation for key - \`${error.key}\` for file \`${error.key}\`.`
+      )
+    }
+
+    if (errors.length) {
+      core.setFailed('Action failed because translations are missing')
+    } else {
+      core.info('No translations missing.')
+    }
   } catch (error) {
-    // Fail the workflow run if an error occurs
-    if (error instanceof Error) core.setFailed(error.message)
+    if (error instanceof Error) {
+      core.setFailed(error.message)
+    }
   }
 }

@@ -1,23 +1,51 @@
-type Error = {
-  readonly key: string
+export type Translation = {
+  filePath: string
+  json: string
 }
 
-function getPaths(obj: any, path: string, paths: string[]) {
-  for (const key in obj) {
-    const fullPath = `${path ? `${path}.` : ''}${key}`
+type Error = {
+  readonly key: string
+  readonly filePath: string
+}
 
-    if (typeof obj[key] === 'object') {
-      getPaths(obj[key], fullPath, paths)
+interface GetPathsProps {
+  obj: Record<string, unknown>
+  path: string
+  paths: string[]
+}
+
+function getPaths({ obj, path, paths }: GetPathsProps): void {
+  for (const key in obj) {
+    path = `${path ? `${path}.` : ''}${key}`
+
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      getPaths({
+        obj: obj[key] as Record<string, unknown>,
+        path,
+        paths
+      })
     } else {
-      paths.push(fullPath)
+      paths.push(path)
     }
   }
 }
 
-function comparePaths(first: string[], second: string[], errors: Error[] = []) {
-  for (let i = 0; i < first.length; i++) {
-    if (first[i] !== second[i]) {
-      errors.push({ key: first[i] })
+interface ComparePathsProps {
+  requiredPaths: string[]
+  paths: string[]
+  errors: Error[]
+  filePath: string
+}
+
+function comparePaths({
+  requiredPaths,
+  paths,
+  errors,
+  filePath
+}: ComparePathsProps): boolean {
+  for (let i = 0; i < requiredPaths.length; i++) {
+    if (requiredPaths[i] !== paths[i]) {
+      errors.push({ key: requiredPaths[i], filePath })
 
       return false
     }
@@ -27,35 +55,40 @@ function comparePaths(first: string[], second: string[], errors: Error[] = []) {
 }
 
 interface CheckTranslationsProps {
-  readonly mainTranslation: string
-  readonly translations: string[]
+  readonly mainTranslation: Translation
+  readonly translations: Translation[]
 }
 
 export function checkTranslation({
   mainTranslation,
   translations
-}: CheckTranslationsProps) {
+}: CheckTranslationsProps): {
+  readonly errors: Error[]
+  readonly success: boolean
+} {
   const errors: Error[] = []
 
-  const mainTranslationObj = JSON.parse(mainTranslation)
   const requiredPaths: string[] = []
-  getPaths(mainTranslationObj, '', requiredPaths)
+  getPaths({
+    obj: JSON.parse(mainTranslation.json),
+    path: '',
+    paths: requiredPaths
+  })
 
-  for (const translation of translations) {
-    const translationObj = JSON.parse(translation)
-
+  for (const { filePath, json } of translations) {
     const paths: string[] = []
 
-    getPaths(translationObj, '', paths)
-    comparePaths(requiredPaths, paths, errors)
+    getPaths({
+      obj: JSON.parse(json),
+      path: '',
+      paths
+    })
+
+    comparePaths({ requiredPaths, paths, errors, filePath })
   }
 
-  if (errors.length) {
-    for (const error of errors) {
-      console.error(`key missing: ${error.key}`)
-    }
-    return false
+  return {
+    success: errors.length === 0,
+    errors
   }
-
-  return true
 }
