@@ -25033,6 +25033,9 @@ async function run() {
         if (errors.length) {
             core.error('Missing translations');
         }
+        else {
+            core.info('No translations missing.');
+        }
     }
     catch (error) {
         if (error instanceof Error) {
