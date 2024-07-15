@@ -24920,6 +24920,63 @@ exports["default"] = _default;
 
 /***/ }),
 
+/***/ 3469:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.checkTranslation = checkTranslation;
+function getPaths({ obj, path, paths }) {
+    for (const key in obj) {
+        path = `${path ? `${path}.` : ''}${key}`;
+        if (typeof obj[key] === 'object' && obj[key] !== null) {
+            getPaths({
+                obj: obj[key],
+                path,
+                paths
+            });
+        }
+        else {
+            paths.push(path);
+        }
+    }
+}
+function comparePaths({ requiredPaths, paths, errors, filePath }) {
+    for (let i = 0; i < requiredPaths.length; i++) {
+        if (requiredPaths[i] !== paths[i]) {
+            errors.push({ key: requiredPaths[i], filePath });
+            return false;
+        }
+    }
+    return true;
+}
+function checkTranslation({ mainTranslation, translations }) {
+    const errors = [];
+    const requiredPaths = [];
+    getPaths({
+        obj: JSON.parse(mainTranslation.json),
+        path: '',
+        paths: requiredPaths
+    });
+    for (const { filePath, json } of translations) {
+        const paths = [];
+        getPaths({
+            obj: JSON.parse(json),
+            path: '',
+            paths
+        });
+        comparePaths({ requiredPaths, paths, errors, filePath });
+    }
+    return {
+        success: errors.length === 0,
+        errors
+    };
+}
+
+
+/***/ }),
+
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -24952,6 +25009,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
 const read_file_contents_1 = __nccwpck_require__(5711);
+const check_translations_1 = __nccwpck_require__(3469);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -24960,10 +25018,21 @@ async function run() {
     try {
         const mainTranslationPath = core.getInput('main_translation_path');
         const translationPaths = core.getInput('translation_paths').split(',');
-        const [mainTranslation, ...translations] = await Promise.all([mainTranslationPath, ...translationPaths].map(read_file_contents_1.readFileContent));
-        console.log('mainTranslation', mainTranslation);
-        console.log('translations', translations.join('\n'));
+        const [mainTranslation, ...translations] = await Promise.all([mainTranslationPath, ...translationPaths].map(async (filePath) => ({
+            json: await (0, read_file_contents_1.readFileContent)(filePath),
+            filePath
+        })));
         core.info('Checking translations...');
+        const { errors } = (0, check_translations_1.checkTranslation)({
+            mainTranslation,
+            translations
+        });
+        for (const error of errors) {
+            core.notice(`Missing translation for key - ${error.key} for file ${error.key}.`);
+        }
+        if (errors.length) {
+            core.error('Missing translations');
+        }
     }
     catch (error) {
         if (error instanceof Error) {

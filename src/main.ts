@@ -33,6 +33,8 @@ export async function run(): Promise<void> {
 
     if (errors.length) {
       core.error('Missing translations')
+    } else {
+      core.info('No translations missing.')
     }
   } catch (error) {
     if (error instanceof Error) {
