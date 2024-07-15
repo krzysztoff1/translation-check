@@ -24927,46 +24927,29 @@ exports["default"] = _default;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.checkTranslation = checkTranslation;
-function getPaths({ obj, path, paths }) {
-    for (const key in obj) {
-        path = `${path ? `${path}.` : ''}${key}`;
-        if (typeof obj[key] === 'object' && obj[key] !== null) {
-            getPaths({
-                obj: obj[key],
-                path,
-                paths
-            });
+function deepCompare(main, translation, path, errors, filePath) {
+    for (const key in main) {
+        const newPath = path ? `${path}.${key}` : key;
+        if (!(key in translation)) {
+            errors.push({ key: newPath, filePath });
+            continue;
         }
-        else {
-            paths.push(path);
-        }
-    }
-}
-function comparePaths({ requiredPaths, paths, errors, filePath }) {
-    for (let i = 0; i < requiredPaths.length; i++) {
-        if (requiredPaths[i] !== paths[i]) {
-            errors.push({ key: requiredPaths[i], filePath });
-            return false;
+        if (typeof main[key] === 'object' &&
+            main[key] !== null &&
+            typeof translation[key] === 'object' &&
+            translation[key] !== null &&
+            !Array.isArray(main[key]) &&
+            !Array.isArray(translation[key])) {
+            deepCompare(main[key], translation[key], newPath, errors, filePath);
         }
     }
-    return true;
 }
 function checkTranslation({ mainTranslation, translations }) {
     const errors = [];
-    const requiredPaths = [];
-    getPaths({
-        obj: JSON.parse(mainTranslation.json),
-        path: '',
-        paths: requiredPaths
-    });
+    const mainObj = JSON.parse(mainTranslation.json);
     for (const { filePath, json } of translations) {
-        const paths = [];
-        getPaths({
-            obj: JSON.parse(json),
-            path: '',
-            paths
-        });
-        comparePaths({ requiredPaths, paths, errors, filePath });
+        const translationObj = JSON.parse(json);
+        deepCompare(mainObj, translationObj, '', errors, filePath);
     }
     return {
         success: errors.length === 0,
@@ -25031,7 +25014,7 @@ async function run() {
             translations
         });
         for (const error of errors) {
-            core.error(`Missing translation for key - \`${error.key}\` for file \`${error.key}\`.`);
+            core.error(`Missing translation for key - \`${error.key}\` for file \`${error.filePath}\`.`);
         }
         if (errors.length) {
             core.setFailed('Action failed because translations are missing');

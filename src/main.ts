@@ -30,7 +30,7 @@ export async function run(): Promise<void> {
 
     for (const error of errors) {
       core.error(
-        `Missing translation for key - \`${error.key}\` for file \`${error.key}\`.`
+        `Missing translation for key - \`${error.key}\` for file \`${error.filePath}\`.`
       )
     }
 
