@@ -9,7 +9,10 @@ import { checkTranslation, Translation } from './check-translations'
 export async function run(): Promise<void> {
   try {
     const mainTranslationPath = core.getInput('main_translation_path')
-    const translationPaths = core.getInput('translation_paths').split(',')
+    const translationPaths = core
+      .getInput('translation_paths')
+      .split(',')
+      .map(s => s.trim())
 
     const [mainTranslation, ...translations]: Translation[] = await Promise.all(
       [mainTranslationPath, ...translationPaths].map(async filePath => ({

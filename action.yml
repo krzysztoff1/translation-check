@@ -2,10 +2,10 @@ name: 'Translation Check'
 description:
   'Check if all keys in the main translation file are present in the other
   translation files'
-author: 'Krzysztof Duda'
+author: 'krzysztoff1'
 
 branding:
-  icon: 'heart'
+  icon: 'flag'
   color: 'blue'
 
 inputs:
@@ -16,7 +16,7 @@ inputs:
   translation_paths:
     description: 'The paths to the translation files, separated by commas'
     required: true
-    default: './src/locales/*.json'
+    default: './src/locales/pl.json'
 
 runs:
   using: node20
