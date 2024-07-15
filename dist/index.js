@@ -25031,7 +25031,7 @@ async function run() {
             core.error(`Missing translation for key - \`${error.key}\` for file \`${error.key}\`.`);
         }
         if (errors.length) {
-            core.setFailed('Missing translations');
+            core.setFailed('Action failed because translations are missing');
         }
         else {
             core.info('No translations missing.');
