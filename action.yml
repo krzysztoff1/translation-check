@@ -1,23 +1,22 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'Translation Check'
+description:
+  'Check if all keys in the main translation file are present in the other
+  translation files'
+author: 'krzysztoff1'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
-  color: 'red'
+  icon: 'flag'
+  color: 'blue'
 
-# Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  main_translation_path:
+    description: 'The path to the main translation file'
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+    default: './src/locales/en.json'
+  translation_paths:
+    description: 'The paths to the translation files, separated by commas'
+    required: true
+    default: './src/locales/pl.json'
 
 runs:
   using: node20
