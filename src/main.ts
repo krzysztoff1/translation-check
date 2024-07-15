@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import { readFileContent } from './read-file-contents'
+import { checkTranslation, Translation } from './check-translations'
 
 /**
  * The main function for the action.
@@ -10,14 +11,29 @@ export async function run(): Promise<void> {
     const mainTranslationPath = core.getInput('main_translation_path')
     const translationPaths = core.getInput('translation_paths').split(',')
 
-    const [mainTranslation, ...translations] = await Promise.all(
-      [mainTranslationPath, ...translationPaths].map(readFileContent)
+    const [mainTranslation, ...translations]: Translation[] = await Promise.all(
+      [mainTranslationPath, ...translationPaths].map(async filePath => ({
+        json: await readFileContent(filePath),
+        filePath
+      }))
     )
 
-    console.log('mainTranslation', mainTranslation)
-    console.log('translations', translations.join('\n'))
-
     core.info('Checking translations...')
+
+    const { errors } = checkTranslation({
+      mainTranslation,
+      translations
+    })
+
+    for (const error of errors) {
+      core.notice(
+        `Missing translation for key - ${error.key} for file ${error.key}.`
+      )
+    }
+
+    if (errors.length) {
+      core.error('Missing translations')
+    }
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message)
