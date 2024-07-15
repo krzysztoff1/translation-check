@@ -32,7 +32,7 @@ export async function run(): Promise<void> {
     }
 
     if (errors.length) {
-      core.setFailed('Missing translations')
+      core.setFailed('Action failed because translations are missing')
     } else {
       core.info('No translations missing.')
     }
