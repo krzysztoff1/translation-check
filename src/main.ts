@@ -26,13 +26,13 @@ export async function run(): Promise<void> {
     })
 
     for (const error of errors) {
-      core.notice(
-        `Missing translation for key - ${error.key} for file ${error.key}.`
+      core.error(
+        `Missing translation for key - \`${error.key}\` for file \`${error.key}\`.`
       )
     }
 
     if (errors.length) {
-      core.error('Missing translations')
+      core.setFailed('Missing translations')
     } else {
       core.info('No translations missing.')
     }
