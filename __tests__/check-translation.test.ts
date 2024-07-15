@@ -24,6 +24,7 @@ describe('checkTranslation', () => {
     })
 
     expect(result.success).toBe(false)
+    expect(result.errors).toEqual([{ key: 'about', filePath: 'pl.json' }])
   })
 
   it('should handle nested objects correctly', () => {
@@ -60,6 +61,9 @@ describe('checkTranslation', () => {
     })
 
     expect(result.success).toBe(false)
+    expect(result.errors).toEqual([
+      { key: 'about.required', filePath: 'pl.json' }
+    ])
   })
 
   it('should parse deeply nested translations', () => {
@@ -104,6 +108,53 @@ describe('checkTranslation', () => {
     })
 
     expect(result.success).toBe(true)
+  })
+
+  it('should parse deeply nested translations and provide correct path for errors', () => {
+    const en = JSON.stringify({
+      menu: {
+        file: {
+          new: 'New',
+          open: 'Open',
+          save: {
+            label: 'Save',
+            shortcut: 'Ctrl+S',
+            find_me: 'Find me'
+          }
+        },
+        edit: {
+          cut: 'Cut',
+          copy: 'Copy',
+          paste: 'Paste'
+        }
+      }
+    })
+    const pl = JSON.stringify({
+      menu: {
+        file: {
+          new: 'Nowy',
+          open: 'Otwórz',
+          save: {
+            label: 'Zapisz',
+            shortcut: 'Ctrl+S'
+          }
+        },
+        edit: {
+          cut: 'Wytnij',
+          copy: 'Kopiuj',
+          paste: 'Wklej'
+        }
+      }
+    })
+
+    const result = checkTranslation({
+      mainTranslation: { json: en, filePath: 'en.json' },
+      translations: [{ json: pl, filePath: 'pl.json' }]
+    })
+
+    expect(result.errors).toEqual([
+      { key: 'menu.file.save.find_me', filePath: 'pl.json' }
+    ])
   })
 
   it('should handle multiple translations', () => {

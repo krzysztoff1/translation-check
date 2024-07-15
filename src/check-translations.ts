@@ -8,50 +8,36 @@ type Error = {
   readonly filePath: string
 }
 
-interface GetPathsProps {
-  obj: Record<string, unknown>
-  path: string
-  paths: string[]
-}
+type JsonObject = { [key: string]: JsonValue }
 
-function getPaths({ obj, path, paths }: GetPathsProps): void {
-  for (const key in obj) {
-    path = `${path ? `${path}.` : ''}${key}`
+type JsonValue = string | number | boolean | null | JsonObject | JsonValue[]
 
-    if (typeof obj[key] === 'object' && obj[key] !== null) {
-      getPaths({
-        obj: obj[key] as Record<string, unknown>,
-        path,
-        paths
-      })
-    } else {
-      paths.push(path)
-    }
-  }
-}
-
-interface ComparePathsProps {
-  requiredPaths: string[]
-  paths: string[]
-  errors: Error[]
+function deepCompare(
+  main: JsonObject,
+  translation: JsonObject,
+  path: string,
+  errors: Error[],
   filePath: string
-}
+): void {
+  for (const key in main) {
+    const newPath = path ? `${path}.${key}` : key
 
-function comparePaths({
-  requiredPaths,
-  paths,
-  errors,
-  filePath
-}: ComparePathsProps): boolean {
-  for (let i = 0; i < requiredPaths.length; i++) {
-    if (requiredPaths[i] !== paths[i]) {
-      errors.push({ key: requiredPaths[i], filePath })
+    if (!(key in translation)) {
+      errors.push({ key: newPath, filePath })
+      continue
+    }
 
-      return false
+    if (
+      typeof main[key] === 'object' &&
+      main[key] !== null &&
+      typeof translation[key] === 'object' &&
+      translation[key] !== null &&
+      !Array.isArray(main[key]) &&
+      !Array.isArray(translation[key])
+    ) {
+      deepCompare(main[key], translation[key], newPath, errors, filePath)
     }
   }
-
-  return true
 }
 
 interface CheckTranslationsProps {
@@ -67,24 +53,11 @@ export function checkTranslation({
   readonly success: boolean
 } {
   const errors: Error[] = []
-
-  const requiredPaths: string[] = []
-  getPaths({
-    obj: JSON.parse(mainTranslation.json),
-    path: '',
-    paths: requiredPaths
-  })
+  const mainObj = JSON.parse(mainTranslation.json)
 
   for (const { filePath, json } of translations) {
-    const paths: string[] = []
-
-    getPaths({
-      obj: JSON.parse(json),
-      path: '',
-      paths
-    })
-
-    comparePaths({ requiredPaths, paths, errors, filePath })
+    const translationObj = JSON.parse(json)
+    deepCompare(mainObj, translationObj, '', errors, filePath)
   }
 
   return {
