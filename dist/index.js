@@ -25017,7 +25017,10 @@ const check_translations_1 = __nccwpck_require__(3469);
 async function run() {
     try {
         const mainTranslationPath = core.getInput('main_translation_path');
-        const translationPaths = core.getInput('translation_paths').split(',');
+        const translationPaths = core
+            .getInput('translation_paths')
+            .split(',')
+            .map(s => s.trim());
         const [mainTranslation, ...translations] = await Promise.all([mainTranslationPath, ...translationPaths].map(async (filePath) => ({
             json: await (0, read_file_contents_1.readFileContent)(filePath),
             filePath

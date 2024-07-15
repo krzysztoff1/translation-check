@@ -1,14 +1,16 @@
 # Translation Check Action
+
 [![Coverage](./badges/coverage.svg)](./badges/coverage.svg)
 
-Simple GitHub Action to check if all keys in the main translation file are present in other translation files.
+Simple GitHub Action to check if all keys in the main translation file are
+present in other translation files.
 
 ## Inputs
 
 ### `main_translation_path`
 
-**Required** The path to the main translation file (usually the English version).
-Default: `'./src/locales/en.json'`
+**Required** The path to the main translation file (usually the English
+version). Default: `'./src/locales/en.json'` w
 
 ### `translation_paths`
 
