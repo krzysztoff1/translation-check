@@ -2,19 +2,27 @@ type Error = {
   readonly key: string
 }
 
-function getPaths(obj: any, path: string, paths: string[]) {
+function getPaths(
+  obj: Record<string, unknown>,
+  path: string,
+  paths: string[]
+): void {
   for (const key in obj) {
     const fullPath = `${path ? `${path}.` : ''}${key}`
 
-    if (typeof obj[key] === 'object') {
-      getPaths(obj[key], fullPath, paths)
+    if (typeof obj[key] === 'object' && obj[key] !== null) {
+      getPaths(obj[key] as Record<string, unknown>, fullPath, paths)
     } else {
       paths.push(fullPath)
     }
   }
 }
 
-function comparePaths(first: string[], second: string[], errors: Error[] = []) {
+function comparePaths(
+  first: string[],
+  second: string[],
+  errors: Error[] = []
+): boolean {
   for (let i = 0; i < first.length; i++) {
     if (first[i] !== second[i]) {
       errors.push({ key: first[i] })
@@ -34,7 +42,7 @@ interface CheckTranslationsProps {
 export function checkTranslation({
   mainTranslation,
   translations
-}: CheckTranslationsProps) {
+}: CheckTranslationsProps): boolean {
   const errors: Error[] = []
 
   const mainTranslationObj = JSON.parse(mainTranslation)
