@@ -12,6 +12,7 @@ export async function run(): Promise<void> {
     const translationPaths = core
       .getInput('translation_paths')
       .split(',')
+      .filter(Boolean)
       .map(s => s.trim())
 
     const [mainTranslation, ...translations]: Translation[] = await Promise.all(
@@ -30,15 +31,16 @@ export async function run(): Promise<void> {
 
     for (const error of errors) {
       core.error(
-        `Missing translation for key - \`${error.key}\` for file \`${error.filePath}\`.`
+        `Missing translation for key - '${error.key}' for file '${error.filePath}'.`
       )
     }
 
     if (errors.length) {
-      core.setFailed('Action failed because translations are missing')
-    } else {
-      core.info('No translations missing.')
+      core.setFailed('Action failed because translations are missing.')
+      return
     }
+
+    core.info('No translations missing.')
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message)

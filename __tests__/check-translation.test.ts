@@ -1,7 +1,7 @@
 import { checkTranslation } from '../src/check-translations'
 import { expect } from '@jest/globals'
 
-describe('checkTranslation', () => {
+describe('check translations', () => {
   it('should return true for matching translations', () => {
     const en = JSON.stringify({ home: 'Home' })
     const pl = JSON.stringify({ home: 'Strona główna' })

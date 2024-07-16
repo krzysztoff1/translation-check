@@ -25003,6 +25003,7 @@ async function run() {
         const translationPaths = core
             .getInput('translation_paths')
             .split(',')
+            .filter(Boolean)
             .map(s => s.trim());
         const [mainTranslation, ...translations] = await Promise.all([mainTranslationPath, ...translationPaths].map(async (filePath) => ({
             json: await (0, read_file_contents_1.readFileContent)(filePath),
@@ -25014,14 +25015,13 @@ async function run() {
             translations
         });
         for (const error of errors) {
-            core.error(`Missing translation for key - \`${error.key}\` for file \`${error.filePath}\`.`);
+            core.error(`Missing translation for key - '${error.key}' for file '${error.filePath}'.`);
         }
         if (errors.length) {
-            core.setFailed('Action failed because translations are missing');
+            core.setFailed('Action failed because translations are missing.');
+            return;
         }
-        else {
-            core.info('No translations missing.');
-        }
+        core.info('No translations missing.');
     }
     catch (error) {
         if (error instanceof Error) {
