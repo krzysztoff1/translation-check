@@ -1,6 +1,7 @@
 import * as core from '@actions/core'
 import { readFileContent } from './read-file-contents'
 import { checkTranslation, Translation } from './check-translations'
+import { convertToJson } from './convert-to-json'
 
 /**
  * The main function for the action.
@@ -16,10 +17,15 @@ export async function run(): Promise<void> {
       .map(s => s.trim())
 
     const [mainTranslation, ...translations]: Translation[] = await Promise.all(
-      [mainTranslationPath, ...translationPaths].map(async filePath => ({
-        json: await readFileContent(filePath),
-        filePath
-      }))
+      [mainTranslationPath, ...translationPaths].map(async filePath => {
+        const file = await readFileContent(filePath)
+        const json = await convertToJson(file)
+
+        return {
+          json,
+          filePath
+        }
+      })
     )
 
     core.info('Checking translations...')

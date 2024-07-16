@@ -95,4 +95,71 @@ describe('action', () => {
       'Action failed because translations are missing.'
     )
   })
+
+  it('check the translation in yaml file', async () => {
+    getInputMock.mockImplementation(name => {
+      switch (name) {
+        case 'main_translation_path':
+          return 'example-translations/en.yaml'
+        case 'translation_paths':
+          return 'example-translations/pl.yaml'
+        default:
+          return ''
+      }
+    })
+
+    await main.run()
+
+    expect(runMock).toHaveReturned()
+
+    expect(infoMock).toHaveBeenCalledTimes(2)
+    expect(infoMock).toHaveBeenNthCalledWith(1, 'Checking translations...')
+    expect(infoMock).toHaveBeenNthCalledWith(2, 'No translations missing.')
+    expect(errorMock).not.toHaveBeenCalled()
+    expect(setFailedMock).not.toHaveBeenCalled()
+  })
+
+  it('displays an error message for missing translations in yaml file', async () => {
+    getInputMock.mockImplementation(name => {
+      switch (name) {
+        case 'main_translation_path':
+          return 'example-translations/en.yaml'
+        case 'translation_paths':
+          return 'example-translations/pl-missing.yaml'
+        default:
+          return ''
+      }
+    })
+
+    await main.run()
+
+    expect(runMock).toHaveReturned()
+
+    expect(infoMock).toHaveBeenCalledTimes(1)
+    expect(infoMock).toHaveBeenNthCalledWith(1, 'Checking translations...')
+    expect(errorMock).toHaveBeenCalledTimes(1)
+    expect(errorMock).toHaveBeenCalledWith(
+      `Missing translation for key - 'index.description' for file 'example-translations/pl-missing.yaml'.`
+    )
+    expect(setFailedMock).toHaveBeenCalledWith(
+      'Action failed because translations are missing.'
+    )
+  })
+
+  it('displays an error message for malformed translations', async () => {
+    getInputMock.mockImplementation(name => {
+      switch (name) {
+        case 'main_translation_path':
+          return 'example-translations/en.json'
+        case 'translation_paths':
+          return 'example-translations/pl-malformed.json'
+        default:
+          return ''
+      }
+    })
+
+    await main.run()
+
+    expect(errorMock).toHaveBeenCalled()
+  })
 })

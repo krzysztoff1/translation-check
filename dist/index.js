@@ -24946,15 +24946,40 @@ function deepCompare(main, translation, path, errors, filePath) {
 }
 function checkTranslation({ mainTranslation, translations }) {
     const errors = [];
-    const mainObj = JSON.parse(mainTranslation.json);
+    const mainObj = mainTranslation.json;
     for (const { filePath, json } of translations) {
-        const translationObj = JSON.parse(json);
-        deepCompare(mainObj, translationObj, '', errors, filePath);
+        deepCompare(mainObj, json, '', errors, filePath);
     }
     return {
         success: errors.length === 0,
         errors
     };
+}
+
+
+/***/ }),
+
+/***/ 4240:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.convertToJson = convertToJson;
+async function convertYamlToJson(contents) {
+    const yaml = await __nccwpck_require__.e(/* import() */ 19).then(__nccwpck_require__.bind(__nccwpck_require__, 4019));
+    return yaml.load(contents);
+}
+async function convertToJson({ contents, extension }) {
+    switch (extension) {
+        case 'json':
+            return JSON.parse(contents);
+        case 'yaml':
+        case 'yml':
+            return await convertYamlToJson(contents);
+        default:
+            throw new Error('File extension not supported');
+    }
 }
 
 
@@ -24993,6 +25018,7 @@ exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
 const read_file_contents_1 = __nccwpck_require__(5711);
 const check_translations_1 = __nccwpck_require__(3469);
+const convert_to_json_1 = __nccwpck_require__(4240);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -25005,10 +25031,14 @@ async function run() {
             .split(',')
             .filter(Boolean)
             .map(s => s.trim());
-        const [mainTranslation, ...translations] = await Promise.all([mainTranslationPath, ...translationPaths].map(async (filePath) => ({
-            json: await (0, read_file_contents_1.readFileContent)(filePath),
-            filePath
-        })));
+        const [mainTranslation, ...translations] = await Promise.all([mainTranslationPath, ...translationPaths].map(async (filePath) => {
+            const file = await (0, read_file_contents_1.readFileContent)(filePath);
+            const json = await (0, convert_to_json_1.convertToJson)(file);
+            return {
+                json,
+                filePath
+            };
+        }));
         core.info('Checking translations...');
         const { errors } = (0, check_translations_1.checkTranslation)({
             mainTranslation,
@@ -25045,10 +25075,18 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.readFileContent = readFileContent;
 const util_1 = __importDefault(__nccwpck_require__(3837));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
+const supportedExtensions = ['json'];
 async function readFileContent(path) {
+    const extension = path.split('.').pop();
+    if (!extension) {
+        throw new Error('File extension not found');
+    }
+    if (!supportedExtensions.includes(extension)) {
+        throw new Error('File extension not supported');
+    }
     const readFile = util_1.default.promisify(fs_1.default.readFile);
     const contents = await readFile(path, 'utf8');
-    return contents;
+    return { contents, extension };
 }
 
 
@@ -26935,10 +26973,105 @@ module.exports = parseParams
 /******/ 		return module.exports;
 /******/ 	}
 /******/ 	
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__nccwpck_require__.m = __webpack_modules__;
+/******/ 	
 /************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__nccwpck_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__nccwpck_require__.o(definition, key) && !__nccwpck_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/ensure chunk */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.f = {};
+/******/ 		// This file contains only the entry chunk.
+/******/ 		// The chunk loading function for additional chunks
+/******/ 		__nccwpck_require__.e = (chunkId) => {
+/******/ 			return Promise.all(Object.keys(__nccwpck_require__.f).reduce((promises, key) => {
+/******/ 				__nccwpck_require__.f[key](chunkId, promises);
+/******/ 				return promises;
+/******/ 			}, []));
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/get javascript chunk filename */
+/******/ 	(() => {
+/******/ 		// This function allow to reference async chunks
+/******/ 		__nccwpck_require__.u = (chunkId) => {
+/******/ 			// return url for filenames based on template
+/******/ 			return "" + chunkId + ".index.js";
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__nccwpck_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/make namespace object */
+/******/ 	(() => {
+/******/ 		// define __esModule on exports
+/******/ 		__nccwpck_require__.r = (exports) => {
+/******/ 			if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+/******/ 			}
+/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
+/******/ 		};
+/******/ 	})();
+/******/ 	
 /******/ 	/* webpack/runtime/compat */
 /******/ 	
 /******/ 	if (typeof __nccwpck_require__ !== 'undefined') __nccwpck_require__.ab = __dirname + "/";
+/******/ 	
+/******/ 	/* webpack/runtime/require chunk loading */
+/******/ 	(() => {
+/******/ 		// no baseURI
+/******/ 		
+/******/ 		// object to store loaded chunks
+/******/ 		// "1" means "loaded", otherwise not loaded yet
+/******/ 		var installedChunks = {
+/******/ 			179: 1
+/******/ 		};
+/******/ 		
+/******/ 		// no on chunks loaded
+/******/ 		
+/******/ 		var installChunk = (chunk) => {
+/******/ 			var moreModules = chunk.modules, chunkIds = chunk.ids, runtime = chunk.runtime;
+/******/ 			for(var moduleId in moreModules) {
+/******/ 				if(__nccwpck_require__.o(moreModules, moduleId)) {
+/******/ 					__nccwpck_require__.m[moduleId] = moreModules[moduleId];
+/******/ 				}
+/******/ 			}
+/******/ 			if(runtime) runtime(__nccwpck_require__);
+/******/ 			for(var i = 0; i < chunkIds.length; i++)
+/******/ 				installedChunks[chunkIds[i]] = 1;
+/******/ 		
+/******/ 		};
+/******/ 		
+/******/ 		// require() chunk loading for javascript
+/******/ 		__nccwpck_require__.f.require = (chunkId, promises) => {
+/******/ 			// "1" is the signal for "already loaded"
+/******/ 			if(!installedChunks[chunkId]) {
+/******/ 				if(true) { // all chunks have JS
+/******/ 					installChunk(require("./" + __nccwpck_require__.u(chunkId)));
+/******/ 				} else installedChunks[chunkId] = 1;
+/******/ 			}
+/******/ 		};
+/******/ 		
+/******/ 		// no external install chunk
+/******/ 		
+/******/ 		// no HMR
+/******/ 		
+/******/ 		// no HMR manifest
+/******/ 	})();
 /******/ 	
 /************************************************************************/
 var __webpack_exports__ = {};
