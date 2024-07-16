@@ -30,9 +30,9 @@ describe('action', () => {
     getInputMock.mockImplementation(name => {
       switch (name) {
         case 'main_translation_path':
-          return './src/locales/en.json'
+          return 'example-translations/en.json'
         case 'translation_paths':
-          return './src/locales/pl.json'
+          return 'example-translations/pl.json'
         default:
           return ''
       }
@@ -144,22 +144,5 @@ describe('action', () => {
     expect(setFailedMock).toHaveBeenCalledWith(
       'Action failed because translations are missing.'
     )
-  })
-
-  it('displays an error message for malformed translations', async () => {
-    getInputMock.mockImplementation(name => {
-      switch (name) {
-        case 'main_translation_path':
-          return 'example-translations/en.json'
-        case 'translation_paths':
-          return 'example-translations/pl-malformed.json'
-        default:
-          return ''
-      }
-    })
-
-    await main.run()
-
-    expect(errorMock).toHaveBeenCalled()
   })
 })

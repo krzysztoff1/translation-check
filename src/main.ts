@@ -8,48 +8,42 @@ import { convertToJson } from './convert-to-json'
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 export async function run(): Promise<void> {
-  try {
-    const mainTranslationPath = core.getInput('main_translation_path')
-    const translationPaths = core
-      .getInput('translation_paths')
-      .split(',')
-      .filter(Boolean)
-      .map(s => s.trim())
+  const mainTranslationPath = core.getInput('main_translation_path')
+  const translationPaths = core
+    .getInput('translation_paths')
+    .split(',')
+    .filter(Boolean)
+    .map(s => s.trim())
 
-    const [mainTranslation, ...translations]: Translation[] = await Promise.all(
-      [mainTranslationPath, ...translationPaths].map(async filePath => {
-        const file = await readFileContent(filePath)
-        const json = await convertToJson(file)
+  const [mainTranslation, ...translations]: Translation[] = await Promise.all(
+    [mainTranslationPath, ...translationPaths].map(async filePath => {
+      const file = await readFileContent(filePath)
+      const json = await convertToJson(file)
 
-        return {
-          json,
-          filePath
-        }
-      })
-    )
-
-    core.info('Checking translations...')
-
-    const { errors } = checkTranslation({
-      mainTranslation,
-      translations
+      return {
+        json,
+        filePath
+      }
     })
+  )
 
-    for (const error of errors) {
-      core.error(
-        `Missing translation for key - '${error.key}' for file '${error.filePath}'.`
-      )
-    }
+  core.info('Checking translations...')
 
-    if (errors.length) {
-      core.setFailed('Action failed because translations are missing.')
-      return
-    }
+  const { errors } = checkTranslation({
+    mainTranslation,
+    translations
+  })
 
-    core.info('No translations missing.')
-  } catch (error) {
-    if (error instanceof Error) {
-      core.setFailed(error.message)
-    }
+  for (const error of errors) {
+    core.error(
+      `Missing translation for key - '${error.key}' for file '${error.filePath}'.`
+    )
   }
+
+  if (errors.length) {
+    core.setFailed('Action failed because translations are missing.')
+    return
+  }
+
+  core.info('No translations missing.')
 }
