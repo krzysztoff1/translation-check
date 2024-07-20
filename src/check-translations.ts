@@ -1,6 +1,6 @@
 export type Translation = {
   filePath: string
-  json: string
+  json: JsonObject
 }
 
 type Error = {
@@ -8,7 +8,7 @@ type Error = {
   readonly filePath: string
 }
 
-type JsonObject = { [key: string]: JsonValue }
+export type JsonObject = { [key: string]: JsonValue }
 
 type JsonValue = string | number | boolean | null | JsonObject | JsonValue[]
 
@@ -53,11 +53,10 @@ export function checkTranslation({
   readonly success: boolean
 } {
   const errors: Error[] = []
-  const mainObj = JSON.parse(mainTranslation.json)
+  const mainObj = mainTranslation.json
 
   for (const { filePath, json } of translations) {
-    const translationObj = JSON.parse(json)
-    deepCompare(mainObj, translationObj, '', errors, filePath)
+    deepCompare(mainObj, json, '', errors, filePath)
   }
 
   return {

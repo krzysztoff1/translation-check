@@ -3,8 +3,8 @@ import { expect } from '@jest/globals'
 
 describe('check translations', () => {
   it('should return true for matching translations', () => {
-    const en = JSON.stringify({ home: 'Home' })
-    const pl = JSON.stringify({ home: 'Strona główna' })
+    const en = { home: 'Home' }
+    const pl = { home: 'Strona główna' }
 
     const result = checkTranslation({
       mainTranslation: { json: en, filePath: 'en.json' },
@@ -15,8 +15,8 @@ describe('check translations', () => {
   })
 
   it('should return false when translation is missing keys', () => {
-    const en = JSON.stringify({ home: 'Home', about: 'About' })
-    const pl = JSON.stringify({ home: 'Strona główna' })
+    const en = { home: 'Home', about: 'About' }
+    const pl = { home: 'Strona główna' }
 
     const result = checkTranslation({
       mainTranslation: { json: en, filePath: 'en.json' },
@@ -28,14 +28,14 @@ describe('check translations', () => {
   })
 
   it('should handle nested objects correctly', () => {
-    const en = JSON.stringify({
+    const en = {
       home: 'Home',
       about: { title: 'About', description: 'Description' }
-    })
-    const pl = JSON.stringify({
+    }
+    const pl = {
       home: 'Strona główna',
       about: { title: 'O nas', description: 'Opis' }
-    })
+    }
 
     const result = checkTranslation({
       mainTranslation: { json: en, filePath: 'en.json' },
@@ -46,14 +46,14 @@ describe('check translations', () => {
   })
 
   it('should return false for mismatched nested objects', () => {
-    const en = JSON.stringify({
+    const en = {
       home: 'Home',
       about: { required: 'I am required' }
-    })
-    const pl = JSON.stringify({
+    }
+    const pl = {
       home: 'Strona główna',
       about: { im_not_required: 'I am not required' }
-    })
+    }
 
     const result = checkTranslation({
       mainTranslation: { json: en, filePath: 'en.json' },
@@ -67,7 +67,7 @@ describe('check translations', () => {
   })
 
   it('should parse deeply nested translations', () => {
-    const en = JSON.stringify({
+    const en = {
       menu: {
         file: {
           new: 'New',
@@ -83,8 +83,8 @@ describe('check translations', () => {
           paste: 'Paste'
         }
       }
-    })
-    const pl = JSON.stringify({
+    }
+    const pl = {
       menu: {
         file: {
           new: 'Nowy',
@@ -100,7 +100,7 @@ describe('check translations', () => {
           paste: 'Wklej'
         }
       }
-    })
+    }
 
     const result = checkTranslation({
       mainTranslation: { json: en, filePath: 'en.json' },
@@ -111,7 +111,7 @@ describe('check translations', () => {
   })
 
   it('should parse deeply nested translations and provide correct path for errors', () => {
-    const en = JSON.stringify({
+    const en = {
       menu: {
         file: {
           new: 'New',
@@ -128,8 +128,8 @@ describe('check translations', () => {
           paste: 'Paste'
         }
       }
-    })
-    const pl = JSON.stringify({
+    }
+    const pl = {
       menu: {
         file: {
           new: 'Nowy',
@@ -145,7 +145,7 @@ describe('check translations', () => {
           paste: 'Wklej'
         }
       }
-    })
+    }
 
     const result = checkTranslation({
       mainTranslation: { json: en, filePath: 'en.json' },
@@ -158,10 +158,10 @@ describe('check translations', () => {
   })
 
   it('should handle multiple translations', () => {
-    const en = JSON.stringify({ hello: 'Hello', goodbye: 'Goodbye' })
-    const pl = JSON.stringify({ hello: 'Cześć', goodbye: 'Do widzenia' })
-    const es = JSON.stringify({ hello: 'Hola', goodbye: 'Adiós' })
-    const fr = JSON.stringify({ hello: 'Bonjour', goodbye: 'Au revoir' })
+    const en = { hello: 'Hello', goodbye: 'Goodbye' }
+    const pl = { hello: 'Cześć', goodbye: 'Do widzenia' }
+    const es = { hello: 'Hola', goodbye: 'Adiós' }
+    const fr = { hello: 'Bonjour', goodbye: 'Au revoir' }
 
     const result = checkTranslation({
       mainTranslation: { json: en, filePath: 'en.json' },
@@ -176,9 +176,9 @@ describe('check translations', () => {
   })
 
   it('should return false if any translation is invalid', () => {
-    const en = JSON.stringify({ hello: 'Hello', goodbye: 'Goodbye' })
-    const pl = JSON.stringify({ hello: 'Cześć', goodbye: 'Do widzenia' })
-    const es = JSON.stringify({ hello: 'Hola' }) // Missing 'goodbye'
+    const en = { hello: 'Hello', goodbye: 'Goodbye' }
+    const pl = { hello: 'Cześć', goodbye: 'Do widzenia' }
+    const es = { hello: 'Hola' } // Missing 'goodbye'
 
     const result = checkTranslation({
       mainTranslation: { json: en, filePath: 'en.json' },
@@ -192,8 +192,8 @@ describe('check translations', () => {
   })
 
   it('should handle empty objects', () => {
-    const en = JSON.stringify({})
-    const pl = JSON.stringify({})
+    const en = {}
+    const pl = {}
 
     const result = checkTranslation({
       mainTranslation: { json: en, filePath: 'en.json' },
